@@ -64,4 +64,12 @@ public class ShortenUrlService {
 
         return 0;
     }
+
+
+    public void redirectUrl(String shortenUrl, HttpServletResponse httpServletResponse) throws IOException {
+
+        String originUrl = shortenUrlRepository.findByShortenUrl(shortenUrl).getOriginUrl();
+        httpServletResponse.sendRedirect(originUrl);
+
+    }
 }

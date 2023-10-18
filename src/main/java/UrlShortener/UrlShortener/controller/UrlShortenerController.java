@@ -39,6 +39,20 @@ public class UrlShortenerController {
 
     }
 
+
+    @GetMapping(value="/{shortenUrl}")
+    public void redirectUrl(@PathVariable String shortenUrl, HttpServletResponse httpServletResponse){
+
+
+        try {
+            shortenUrlService.redirectUrl(shortenUrl, httpServletResponse);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
     @Data
     static class Result <T>{
         private T data;
