@@ -39,6 +39,11 @@ public class UrlShortenerController {
 
     }
 
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Object> deleteShortenUrl(@PathVariable Long id){
+        ResponseEntity responseEntity = shortenUrlService.deleteShortenUrl(id);
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
+    }
 
     @GetMapping(value="/{shortenUrl}")
     public void redirectUrl(@PathVariable String shortenUrl, HttpServletResponse httpServletResponse){

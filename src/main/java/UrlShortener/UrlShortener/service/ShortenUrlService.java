@@ -8,11 +8,14 @@ import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -54,15 +57,28 @@ public class ShortenUrlService {
             String encodedUrl = result.toString();
 
             //entity에 shortenurl 저장
-            shortenUrl.setShortenUrl(encodedUrl);
+            shortenUrl.saveShortenUrl(encodedUrl);
 
             return shortenUrl;
 
     }
 
-    public int deleteShortenUrl() {
+    public ResponseEntity deleteShortenUrl(Long id) {
+        Optional<ShortenUrl> shortenUrlId = shortenUrlRepository.findById(id);
 
-        return 0;
+        if(shortenUrlId.isEmpty()){
+           return ResponseEntity.badRequest().body("요청하신 Id에 해당하는 URL이 존재하지 않습니다");
+
+        }
+        ShortenUrl shortenUrl = shortenUrlId.get();
+
+        if(shortenUrl.getDeleteShortenUrlDate()!=null){
+            return ResponseEntity.badRequest().body("이미 삭제된 URL입니다");
+        }
+
+        shortenUrl.checkingDeleteTime();
+
+        return ResponseEntity.ok(shortenUrl);
     }
 
 
