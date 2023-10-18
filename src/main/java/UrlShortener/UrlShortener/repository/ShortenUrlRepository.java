@@ -10,6 +10,5 @@ import javax.persistence.EntityManager;
 
 @Repository
 public interface ShortenUrlRepository extends JpaRepository<ShortenUrl, Long> {
-
-
+    ShortenUrl findByShortenUrl(String shortenUrl);
 }
