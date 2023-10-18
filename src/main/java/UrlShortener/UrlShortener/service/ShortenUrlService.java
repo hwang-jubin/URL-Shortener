@@ -1,27 +1,44 @@
 package UrlShortener.UrlShortener.service;
 
+import UrlShortener.UrlShortener.exception.ErrorCode;
+import UrlShortener.UrlShortener.exception.InvalidUrlException;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
+import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ShortenUrlService {
 
     private final ShortenUrlRepository shortenUrlRepository;
+    private final UrlGenerator urlGenerator;
 
-
-    @Transactional
     public ShortenUrl createShortenUrl(ShortenUrl shortenUrl) {
 
-        //url 검증 제대로 된 형식의 url 인지 확인
+        System.out.println("service start");
+
+
+//         URL 유효성 검사 - 형식이 맞지 않으면 예외를 던짐
         UrlValidator urlValidator = new UrlValidator();
-        if(urlValidator.isValid(shortenUrl.getOriginUrl())){
+        if (!urlValidator.isValid(shortenUrl.getOriginUrl())) {
+            log.info("형식에 맞지 않는 url={}", shortenUrl.getOriginUrl());
+            System.out.println("잘못된 url 요청");
+            throw new InvalidUrlException("올바른 url 형식을 입력해주세요.", ErrorCode.BAD_REQUEST);
+        }
+
             // db에 저장하면서 id 를 가지고 옴
             ShortenUrl savedshortenUrl = shortenUrlRepository.save(shortenUrl);
+
             // encoding 알고리듬
             Long id = savedshortenUrl.getId();
 
@@ -31,16 +48,18 @@ public class ShortenUrlService {
             while(id > 0){
                 int remainder = (int) (id % 62);
                 result.insert(0, BASE62_CHARS.charAt(remainder));
+                id /= 62;
             }
-
+            //배열을 String으로
             String encodedUrl = result.toString();
 
-        }
+            //entity에 shortenurl 저장
+            shortenUrl.setShortenUrl(encodedUrl);
 
+            return shortenUrl;
 
     }
 
-    @Transactional
     public int deleteShortenUrl() {
 
         return 0;
