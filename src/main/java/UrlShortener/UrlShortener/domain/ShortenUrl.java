@@ -10,10 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Getter
-@Setter
 public class ShortenUrl {
 
     @Id
@@ -29,6 +29,20 @@ public class ShortenUrl {
     private LocalDateTime createShortenUrlDate;
 
     private LocalDateTime deleteShortenUrlDate;
+
+    //임의 생성 방지
+    protected ShortenUrl() {
+
+    }
+
+    public void saveShortenUrl(String encodedUrl){
+        this.shortenUrl = encodedUrl;
+    }
+
+    public void checkingDeleteTime(){
+        this.deleteShortenUrlDate = LocalDateTime.now();
+        System.out.println(deleteShortenUrlDate);
+    }
 
 
 }
