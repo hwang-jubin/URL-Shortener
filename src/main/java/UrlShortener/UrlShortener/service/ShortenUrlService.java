@@ -1,18 +1,19 @@
 package UrlShortener.UrlShortener.service;
 
-import UrlShortener.UrlShortener.exception.ErrorCode;
-import UrlShortener.UrlShortener.exception.InvalidUrlException;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
+import UrlShortener.UrlShortener.exception.customException.BadRequestException;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
 import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,7 +34,7 @@ public class ShortenUrlService {
         if (!urlValidator.isValid(shortenUrl.getOriginUrl())) {
             log.info("형식에 맞지 않는 url={}", shortenUrl.getOriginUrl());
             System.out.println("잘못된 url 요청");
-            throw new InvalidUrlException("올바른 url 형식을 입력해주세요.", ErrorCode.BAD_REQUEST);
+            throw new BadRequestException("올바른 url 형식을 입력해주세요.");
         }
 
             // db에 저장하면서 id 를 가지고 옴
@@ -54,15 +55,28 @@ public class ShortenUrlService {
             String encodedUrl = result.toString();
 
             //entity에 shortenurl 저장
-            shortenUrl.setShortenUrl(encodedUrl);
+            shortenUrl.saveEncodedUrl(encodedUrl);
 
             return shortenUrl;
 
     }
 
-    public int deleteShortenUrl() {
+    public ResponseEntity deleteShortenUrl(Long id) {
+        Optional<ShortenUrl> shortenUrlId = shortenUrlRepository.findById(id);
 
-        return 0;
+        if(shortenUrlId.isEmpty()){
+           return ResponseEntity.badRequest().body("요청하신 Id에 해당하는 URL이 존재하지 않습니다");
+
+        }
+        ShortenUrl shortenUrl = shortenUrlId.get();
+
+        if(shortenUrl.getDeleteShortenUrlDate()!=null){
+            return ResponseEntity.badRequest().body("이미 삭제된 URL입니다");
+        }
+
+        shortenUrl.checkingDeleteTime();
+
+        return ResponseEntity.ok(shortenUrl);
     }
 
 

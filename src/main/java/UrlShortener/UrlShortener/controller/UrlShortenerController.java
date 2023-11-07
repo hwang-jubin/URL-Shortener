@@ -27,18 +27,20 @@ public class UrlShortenerController {
 
     @PostMapping(value = "/url")
     public Result shortenUrlCreation(@RequestBody ShortenUrl shortenUrl){
-        System.out.println("controller start");
-        ShortenUrl newShortenUrl = shortenUrlService.createShortenUrl(shortenUrl);
-        System.out.println("service end");
-        ShortenUrlDto responseShortenUrlDto = new ShortenUrlDto(urlGenerator, shortenUrl);
 
-        System.out.println("controller end");
+        ShortenUrl newShortenUrl = shortenUrlService.createShortenUrl(shortenUrl);
+        ShortenUrlDto responseShortenUrlDto = new ShortenUrlDto(urlGenerator, shortenUrl);
         Result result = new Result(responseShortenUrlDto);
-        System.out.println(result);
+
         return result;
 
     }
 
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Object> deleteShortenUrl(@PathVariable Long id){
+        ResponseEntity responseEntity = shortenUrlService.deleteShortenUrl(id);
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
+    }
 
     @GetMapping(value="/{shortenUrl}")
     public void redirectUrl(@PathVariable String shortenUrl, HttpServletResponse httpServletResponse){
