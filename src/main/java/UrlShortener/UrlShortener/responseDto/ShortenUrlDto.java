@@ -3,6 +3,7 @@ package UrlShortener.UrlShortener.responseDto;
 
 import UrlShortener.UrlShortener.domain.ShortenUrl;
 import UrlShortener.UrlShortener.util.UrlGenerator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -12,14 +13,14 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ShortenUrlDto {
 
-
+    @JsonIgnore
     private final UrlGenerator urlGenerator;
     
     private Long shortenUrlId;
     private String originUrl;
     private String shortenUrl;
     private LocalDateTime createdShortenUrlDate;
-    private LocalDateTime deletedShortenUrlDate;
+
 
     public ShortenUrlDto(UrlGenerator urlGenerator, ShortenUrl shortenUrl) {
         this.urlGenerator = urlGenerator;

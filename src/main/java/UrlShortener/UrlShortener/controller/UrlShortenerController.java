@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -26,9 +27,9 @@ public class UrlShortenerController {
     private final UrlGenerator urlGenerator;
 
     @PostMapping(value = "/url")
-    public Result shortenUrlCreation(@RequestBody ShortenUrl shortenUrl){
-
-        ShortenUrl newShortenUrl = shortenUrlService.createShortenUrl(shortenUrl);
+    public Result shortenUrlCreation(@RequestBody ShortenUrl shortenUrl , HttpServletRequest httpServletRequest){
+        log.info("인증완료");
+        ShortenUrl newShortenUrl = shortenUrlService.createShortenUrl(shortenUrl , httpServletRequest);
         ShortenUrlDto responseShortenUrlDto = new ShortenUrlDto(urlGenerator, shortenUrl);
         Result result = new Result(responseShortenUrlDto);
 
@@ -44,17 +45,12 @@ public class UrlShortenerController {
 
     @GetMapping(value="/{shortenUrl}")
     public void redirectUrl(@PathVariable String shortenUrl, HttpServletResponse httpServletResponse){
-
-
         try {
             shortenUrlService.redirectUrl(shortenUrl, httpServletResponse);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
-
     @Data
     static class Result <T>{
         private T data;
