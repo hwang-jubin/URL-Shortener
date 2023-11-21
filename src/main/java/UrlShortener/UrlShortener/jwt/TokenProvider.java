@@ -48,7 +48,7 @@ public class TokenProvider {
                     .setSubject(loginId)
                     .setIssuedAt(now)
                     .setExpiration(expiryDate)
-                    .signWith(SignatureAlgorithm.HS512, key)
+                    .signWith(key, SignatureAlgorithm.HS512)
                     .compact();
         }
 
@@ -102,12 +102,12 @@ public class TokenProvider {
          * @param token
          * @return
          */
-        public boolean validateToken(String token) {
+        public boolean validateToken(String jwt) {
             try {
                 //token을 기반으로 signature를 섞어서 암호화 한 jwt 를
                 //다시 signature 를 이용해서 claim(body) 을 얻음
-                log.info(token);
-                Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+                log.info(jwt);
+                Claims claims = Jwts.parser().setSigningKey(key.getEncoded()).parseClaimsJws(jwt).getBody();
                 return true;
             } catch (SecurityException | MalformedJwtException e) {
                 log.info("잘못된 JWT 서명입니다.");
