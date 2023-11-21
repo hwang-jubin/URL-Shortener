@@ -28,8 +28,6 @@ public class ShortenUrl {
     @JoinColumn(name="member_id")
     private Member member;
 
-
-
     @CreatedDate
     private LocalDateTime createShortenUrlDate;
 
@@ -40,13 +38,12 @@ public class ShortenUrl {
 
     }
 
-    public void saveEncodedUrl(String encodedUrl){
+    public void saveEncodedUrlAndMember(String encodedUrl, Member member){
         this.shortenUrl = encodedUrl;
+        this.member = member;
     }
 
     public void checkingDeleteTime(){
         this.deleteShortenUrlDate = LocalDateTime.now();
     }
-
-
 }

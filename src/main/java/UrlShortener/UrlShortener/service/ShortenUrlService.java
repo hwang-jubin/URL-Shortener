@@ -1,8 +1,13 @@
 package UrlShortener.UrlShortener.service;
 
+import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
 import UrlShortener.UrlShortener.exception.customException.BadRequestException;
+import UrlShortener.UrlShortener.jwt.JwtAuthenticationFilter;
+import UrlShortener.UrlShortener.jwt.TokenProvider;
+import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
+import UrlShortener.UrlShortener.util.ResolveToken;
 import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
@@ -22,12 +28,15 @@ import java.util.Optional;
 public class ShortenUrlService {
 
     private final ShortenUrlRepository shortenUrlRepository;
-    private final UrlGenerator urlGenerator;
+    private final TokenProvider tokenProvider;
+    private final MemberRepository memberRepository;
+    private final ResolveToken resolveToken;
 
-    public ShortenUrl createShortenUrl(ShortenUrl shortenUrl) {
+    public ShortenUrl createShortenUrl(ShortenUrl shortenUrl, HttpServletRequest request) {
+        //jwt에서 loginId 추출 후, shorthenUrl 생성시 추가
+        String jwt = request.getHeader(JwtAuthenticationFilter.AUTHORIZATION_HEADER);
 
-        System.out.println("service start");
-
+        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
 
 //         URL 유효성 검사 - 형식이 맞지 않으면 예외를 던짐
         UrlValidator urlValidator = new UrlValidator();
@@ -36,7 +45,6 @@ public class ShortenUrlService {
             System.out.println("잘못된 url 요청");
             throw new BadRequestException("올바른 url 형식을 입력해주세요.");
         }
-
             // db에 저장하면서 id 를 가지고 옴
             ShortenUrl savedshortenUrl = shortenUrlRepository.save(shortenUrl);
 
@@ -54,10 +62,12 @@ public class ShortenUrlService {
             //배열을 String으로
             String encodedUrl = result.toString();
 
+            //entity에 member, shortenUrl 저장
+            Optional<Member> member = memberRepository.findByLoginId(loginId);
             //entity에 shortenurl 저장
-            shortenUrl.saveEncodedUrl(encodedUrl);
+            shortenUrl.saveEncodedUrlAndMember(encodedUrl, member.get());
 
-            return shortenUrl;
+        return shortenUrl;
 
     }
 
