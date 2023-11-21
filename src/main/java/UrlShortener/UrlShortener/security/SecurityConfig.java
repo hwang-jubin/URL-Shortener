@@ -45,6 +45,9 @@ public class SecurityConfig{
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 비활성화
+                .and()
                 .authorizeRequests()
                 .antMatchers("/", "/member/signup","/member/login","/originUrl","/url","/2").permitAll() // "/"와 "/member/signup"은 모든 사용자에게 허용
                 .anyRequest().authenticated() // 다른 모든 요청은 인증이 필요
