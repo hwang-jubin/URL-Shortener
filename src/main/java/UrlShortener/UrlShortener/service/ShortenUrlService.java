@@ -7,6 +7,7 @@ import UrlShortener.UrlShortener.jwt.JwtAuthenticationFilter;
 import UrlShortener.UrlShortener.jwt.TokenProvider;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
+import UrlShortener.UrlShortener.util.ResolveToken;
 import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +30,13 @@ public class ShortenUrlService {
     private final ShortenUrlRepository shortenUrlRepository;
     private final TokenProvider tokenProvider;
     private final MemberRepository memberRepository;
+    private final ResolveToken resolveToken;
 
     public ShortenUrl createShortenUrl(ShortenUrl shortenUrl, HttpServletRequest request) {
         //jwt에서 loginId 추출 후, shorthenUrl 생성시 추가
         String jwt = request.getHeader(JwtAuthenticationFilter.AUTHORIZATION_HEADER);
-        String loginId = tokenProvider.getLoginIdFromToken(jwt);
+
+        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
 
 //         URL 유효성 검사 - 형식이 맞지 않으면 예외를 던짐
         UrlValidator urlValidator = new UrlValidator();

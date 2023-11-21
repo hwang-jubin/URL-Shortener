@@ -2,6 +2,7 @@ package UrlShortener.UrlShortener.jwt;
 
 import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.repository.MemberRepository;
+import UrlShortener.UrlShortener.util.ResolveToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jdt.internal.compiler.env.ISourceType;
@@ -27,12 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
     private final MemberRepository memberRepository;
+    private final ResolveToken resolveToken;
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwt = resolveToken(request);
+        String jwt = resolveToken.resolveToken(request);
         String requestURI = request.getRequestURI();
         log.info(jwt);
         // 유효성 검증
@@ -52,12 +54,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
         }
         filterChain.doFilter(request, response);
-    }
-    public String resolveToken(HttpServletRequest request){
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if(bearerToken != null && bearerToken.startsWith("Bearer ")){
-            return bearerToken.substring(7);
-        }
-        return null;
     }
 }
