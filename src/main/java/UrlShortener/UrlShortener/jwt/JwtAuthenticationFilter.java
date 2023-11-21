@@ -22,12 +22,8 @@ import java.util.Optional;
 //토큰 생성 및 검증
 @Slf4j
 @RequiredArgsConstructor
-@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-
     private final TokenProvider tokenProvider;
-    private final MemberRepository memberRepository;
     private final ResolveToken resolveToken;
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -44,12 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = tokenProvider.getAuthentication(jwt);
             // 해당 스프링 시큐리티 유저를 시큐리티 건텍스트에 저장, 즉 디비를 거치지 않음
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+           
             String loginId = authentication.getName();
-
-            Optional<Member> member = memberRepository.findByLoginId(loginId);
-            Member member1 = member.get();
-
             log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
         } else {
             log.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);

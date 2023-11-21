@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -74,7 +75,7 @@ public class TokenProvider {
 
             //principal(주체), credentials(자격 증명), 그리고 부여된 권한(authorities) 등을 포함
             //부여된 권한은 생략
-            return new UsernamePasswordAuthenticationToken(claims.getSubject(),token);
+            return new UsernamePasswordAuthenticationToken(claims.getSubject(),token, Collections.emptyList());
         }
 
         /**
@@ -94,7 +95,6 @@ public class TokenProvider {
                 // 서명이 올바르지 않은 경우 또는 토큰이 만료된 경우
                 return null;
             }
-
         }
 
         /**
