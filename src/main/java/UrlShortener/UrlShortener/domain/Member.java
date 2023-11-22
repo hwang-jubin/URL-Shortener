@@ -1,7 +1,6 @@
 package UrlShortener.UrlShortener.domain;
 
 import lombok.Getter;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
