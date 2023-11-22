@@ -43,7 +43,7 @@ public class UrlShortenerController {
         return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
     }
 
-    @GetMapping(value="/{shortenUrl}")
+    @GetMapping(value="/shorten/{shortenUrl}")
     public void redirectUrl(@PathVariable String shortenUrl, HttpServletResponse httpServletResponse){
         try {
             shortenUrlService.redirectUrl(shortenUrl, httpServletResponse);
