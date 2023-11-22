@@ -7,6 +7,8 @@ import UrlShortener.UrlShortener.jwt.JwtAuthenticationFilter;
 import UrlShortener.UrlShortener.jwt.TokenProvider;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
+import UrlShortener.UrlShortener.responseDto.ShortenUrlDto;
+import UrlShortener.UrlShortener.responseDto.ShortenUrlListDto;
 import UrlShortener.UrlShortener.util.ResolveToken;
 import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -95,5 +98,17 @@ public class ShortenUrlService {
         String originUrl = shortenUrlRepository.findByShortenUrl(shortenUrl).getOriginUrl();
         httpServletResponse.sendRedirect(originUrl);
 
+    }
+
+    public Member getUrlList(HttpServletRequest request) {
+
+        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
+        log.info(loginId);
+        Optional<Member> member = memberRepository.findByLoginId(loginId);
+
+//        ShortenUrlListDto shortenUrlListDto = new ShortenUrlListDto(member.get().getId(), shortenUrlList);
+//
+//        return shortenUrlListDto;
+        return member.get();
     }
 }
