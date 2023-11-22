@@ -2,6 +2,7 @@ package UrlShortener.UrlShortener.responseDto;
 
 import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
+import UrlShortener.UrlShortener.exception.customException.BadRequestException;
 import UrlShortener.UrlShortener.util.UrlGenerator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -24,10 +25,14 @@ public class ShortenUrlListDto {
         //shortenUrl에서 필요한 부분만 추출해서 보여줄 수 있음
         this.shortenUrlList = member.getShortenUrlList().stream()
                 .map(shortenUrl -> {
-                    ListDto listDto = new ListDto();
-                    listDto.setOriginUrl(shortenUrl.getOriginUrl());
-                    listDto.setShortenUrl(urlGenerator.generator(shortenUrl.getShortenUrl()));
-                    return listDto;
+
+                    if(shortenUrl.getDeleteShortenUrlDate()==null){
+                        ListDto listDto = new ListDto();
+                        listDto.setOriginUrl(shortenUrl.getOriginUrl());
+                        listDto.setShortenUrl(urlGenerator.generator(shortenUrl.getShortenUrl()));
+                        return listDto;
+                    }
+                    return null;
                 })
                 .collect(Collectors.toList());
     }
