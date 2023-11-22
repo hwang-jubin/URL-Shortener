@@ -54,7 +54,8 @@ public class SecurityConfig{
 
                 // 인증이 필요한 api 와 아닌 api 를 구별
                 .authorizeRequests()
-                .antMatchers("/", "/member/signup","/member/login","/originUrl","/url","/2").permitAll()
+                .antMatchers("/member/signup","/member/login","/shorten/**")
+                .permitAll()
                 .anyRequest().authenticated()
 
                 .and()
