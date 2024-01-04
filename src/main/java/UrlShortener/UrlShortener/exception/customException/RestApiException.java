@@ -7,14 +7,11 @@ import org.springframework.web.client.HttpClientErrorException;
 @Getter
 public class RestApiException extends RuntimeException{
 
-    ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+    ErrorCode errorCode;
 
 
-    public RestApiException(String customMessage) {
+    public RestApiException(String customMessage , ErrorCode errorCode) {
         super(customMessage);
+        this.errorCode = errorCode;
     }
-
-
-
-
 }
