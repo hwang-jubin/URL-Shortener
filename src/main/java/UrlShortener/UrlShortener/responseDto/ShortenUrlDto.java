@@ -21,6 +21,7 @@ public class ShortenUrlDto {
     private String shortenUrl;
     private Long memberId;
     private LocalDateTime createdShortenUrlDate;
+    private LocalDateTime deletedShortenUrlDate;
 
 
     public ShortenUrlDto(UrlGenerator urlGenerator, ShortenUrl shortenUrl) {
@@ -30,6 +31,7 @@ public class ShortenUrlDto {
        this.shortenUrl = this.urlGenerator.generator(shortenUrl.getShortenUrl());
        this.memberId = shortenUrl.getMember().getId();
        this.createdShortenUrlDate = shortenUrl.getCreateShortenUrlDate();
+       this.deletedShortenUrlDate =shortenUrl.getDeleteShortenUrlDate();
     }
 
 }
