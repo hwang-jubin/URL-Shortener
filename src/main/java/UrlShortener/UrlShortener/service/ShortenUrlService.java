@@ -7,6 +7,8 @@ import UrlShortener.UrlShortener.jwt.JwtAuthenticationFilter;
 import UrlShortener.UrlShortener.jwt.TokenProvider;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
+import UrlShortener.UrlShortener.responseDto.ShortenUrlDto;
+import UrlShortener.UrlShortener.responseDto.ShortenUrlListDto;
 import UrlShortener.UrlShortener.util.ResolveToken;
 import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -71,22 +74,29 @@ public class ShortenUrlService {
 
     }
 
-    public ResponseEntity deleteShortenUrl(Long id) {
+    public ShortenUrl deleteShortenUrl(Long id, HttpServletRequest request) {
         Optional<ShortenUrl> shortenUrlId = shortenUrlRepository.findById(id);
 
         if(shortenUrlId.isEmpty()){
-           return ResponseEntity.badRequest().body("요청하신 Id에 해당하는 URL이 존재하지 않습니다");
+            throw new BadRequestException("삭제를 요청하신 URL에 해당하는 URL이 존재하지 않습니다");
 
         }
         ShortenUrl shortenUrl = shortenUrlId.get();
 
         if(shortenUrl.getDeleteShortenUrlDate()!=null){
-            return ResponseEntity.badRequest().body("이미 삭제된 URL입니다");
+            throw new BadRequestException("이미 삭제된 URL 입니다");
         }
 
-        shortenUrl.checkingDeleteTime();
+//        memberId 가 shortUrl 이 가지고 있는  memberId 와 같아야지 지울 수 있음
+        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
+        Optional<Member> memberEntity = memberRepository.findByLoginId(loginId);
+        if(memberEntity.get().getId()==shortenUrl.getMember().getId()){
+            shortenUrl.checkingDeleteTime();
+            return shortenUrl;
+        }else{
+            throw new BadRequestException("삭제 권한이 없는 사용자 입니다");
+        }
 
-        return ResponseEntity.ok(shortenUrl);
     }
 
 
@@ -95,5 +105,14 @@ public class ShortenUrlService {
         String originUrl = shortenUrlRepository.findByShortenUrl(shortenUrl).getOriginUrl();
         httpServletResponse.sendRedirect(originUrl);
 
+    }
+
+    public Member getUrlList(HttpServletRequest request) {
+
+        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
+        log.info(loginId);
+        Optional<Member> member = memberRepository.findByLoginId(loginId);
+
+        return member.get();
     }
 }
