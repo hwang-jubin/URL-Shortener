@@ -12,7 +12,7 @@ public class UrlGenerator {
     private String domain;
 
     public String generator(String encodedUrl){
-        return "http://"+this.domain+":8080/"+"shorten/"+encodedUrl;
+        return "http://"+this.domain+":8080/"+"public/shorten/"+encodedUrl;
     }
 
 }
