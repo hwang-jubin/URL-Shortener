@@ -1,32 +1,24 @@
 package UrlShortener.UrlShortener.security;
 
 import UrlShortener.UrlShortener.config.CredentialConfig;
-import UrlShortener.UrlShortener.jwt.JwtAuthenticationFilter;
 import UrlShortener.UrlShortener.jwt.filter.CustomJwtFilter;
 import UrlShortener.UrlShortener.jwt.filter.CustomLoginFilter;
 import UrlShortener.UrlShortener.jwt.provider.CustomJwtProvider;
-import UrlShortener.UrlShortener.jwt.TokenProvider;
 import UrlShortener.UrlShortener.jwt.provider.CustomLoginProvider;
-import UrlShortener.UrlShortener.jwt.token.CustomLoginToken;
-import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.util.ResolveToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CsrfFilter;
 
 //기본적인 web 보완 활성화 어노테이션
 @EnableWebSecurity
@@ -35,7 +27,6 @@ import org.springframework.security.web.csrf.CsrfFilter;
 public class SecurityConfig{
 
     private final ResolveToken resolveToken;
-    private final CustomJwtProvider customJwtProvider;
     private final ClientUserDetailService clientUserDetailService;
     private final CredentialConfig credentialConfig;
 
@@ -87,10 +78,6 @@ public class SecurityConfig{
 
         return http.build();
     }
-
-
-
-
 
     //providerManager의 목록에 customJwtProvider 등록
     @Bean
