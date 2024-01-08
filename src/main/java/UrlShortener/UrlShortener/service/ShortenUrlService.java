@@ -1,27 +1,25 @@
 package UrlShortener.UrlShortener.service;
 
+import UrlShortener.UrlShortener.config.CredentialConfig;
 import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
 import UrlShortener.UrlShortener.exception.customException.BadRequestException;
-import UrlShortener.UrlShortener.jwt.JwtAuthenticationFilter;
-import UrlShortener.UrlShortener.jwt.TokenProvider;
+import UrlShortener.UrlShortener.jwt.TokenGenerator;
+import UrlShortener.UrlShortener.jwt.token.CustomJwtToken;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
-import UrlShortener.UrlShortener.responseDto.ShortenUrlDto;
-import UrlShortener.UrlShortener.responseDto.ShortenUrlListDto;
 import UrlShortener.UrlShortener.util.ResolveToken;
-import UrlShortener.UrlShortener.util.UrlGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -31,27 +29,39 @@ import java.util.Optional;
 public class ShortenUrlService {
 
     private final ShortenUrlRepository shortenUrlRepository;
-    private final TokenProvider tokenProvider;
     private final MemberRepository memberRepository;
-    private final ResolveToken resolveToken;
 
+    CustomJwtToken customJwtToken = null;
+
+    /**
+     * shortenUrl 생성
+     * @param shortenUrl
+     * @param request
+     * @return
+     */
     public ShortenUrl createShortenUrl(ShortenUrl shortenUrl, HttpServletRequest request) {
         //jwt에서 loginId 추출 후, shorthenUrl 생성시 추가
-        String jwt = request.getHeader(JwtAuthenticationFilter.AUTHORIZATION_HEADER);
+        String jwt = request.getHeader(CredentialConfig.AUTHORIZATION_HEADER);
 
-        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication instanceof CustomJwtToken){
+            customJwtToken = (CustomJwtToken) authentication;
+        }else{
+            //예외처리
+        }
+        //token loginId와 삭제할 shortenUrl의 member LogId를 비교해서 같아야 삭제할 수 있음
+        String loginId = customJwtToken.getLoginId();
 
 //         URL 유효성 검사 - 형식이 맞지 않으면 예외를 던짐
         UrlValidator urlValidator = new UrlValidator();
         if (!urlValidator.isValid(shortenUrl.getOriginUrl())) {
             log.info("형식에 맞지 않는 url={}", shortenUrl.getOriginUrl());
-            System.out.println("잘못된 url 요청");
             throw new BadRequestException("올바른 url 형식을 입력해주세요.");
         }
             // db에 저장하면서 id 를 가지고 옴
             ShortenUrl savedshortenUrl = shortenUrlRepository.save(shortenUrl);
 
-            // encoding 알고리듬
+            // encoding 알고리즘
             Long id = savedshortenUrl.getId();
 
             //Base62 encoding
@@ -74,12 +84,16 @@ public class ShortenUrlService {
 
     }
 
-    public ShortenUrl deleteShortenUrl(Long id, HttpServletRequest request) {
+    /**
+     * shortenUrl 삭제
+     * @param id
+     * @return
+     */
+    public ShortenUrl deleteShortenUrl(Long id) {
         Optional<ShortenUrl> shortenUrlId = shortenUrlRepository.findById(id);
 
         if(shortenUrlId.isEmpty()){
-            throw new BadRequestException("삭제를 요청하신 URL에 해당하는 URL이 존재하지 않습니다");
-
+            throw new BadRequestException("삭제를 요청하신 URL이 존재하지 않습니다");
         }
         ShortenUrl shortenUrl = shortenUrlId.get();
 
@@ -88,18 +102,30 @@ public class ShortenUrlService {
         }
 
 //        memberId 가 shortUrl 이 가지고 있는  memberId 와 같아야지 지울 수 있음
-        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
-        Optional<Member> memberEntity = memberRepository.findByLoginId(loginId);
-        if(memberEntity.get().getId()==shortenUrl.getMember().getId()){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication instanceof CustomJwtToken){
+            customJwtToken = (CustomJwtToken) authentication;
+        }else{
+            //예외처리
+        }
+        //token loginId와 삭제할 shortenUrl의 member LogId를 비교해서 같아야 삭제할 수 있음
+        String tokenLoginId = customJwtToken.getLoginId();
+        String shortenUrlLoginId = shortenUrl.getMember().getLoginId();
+        if(tokenLoginId == shortenUrlLoginId){
             shortenUrl.checkingDeleteTime();
             return shortenUrl;
         }else{
             throw new BadRequestException("삭제 권한이 없는 사용자 입니다");
         }
-
     }
 
-
+    /**
+     * 원본 url 로 redirect하기
+     * @param shortenUrl
+     * @param httpServletResponse
+     * @throws IOException
+     */
     public void redirectUrl(String shortenUrl, HttpServletResponse httpServletResponse) throws IOException {
 
         String originUrl = shortenUrlRepository.findByShortenUrl(shortenUrl).getOriginUrl();
@@ -107,10 +133,20 @@ public class ShortenUrlService {
 
     }
 
+    /**
+     * UrlList 가져오기
+     * @param request
+     * @return
+     */
     public Member getUrlList(HttpServletRequest request) {
 
-        String loginId = tokenProvider.getLoginIdFromToken(resolveToken.resolveToken(request));
-        log.info(loginId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication instanceof CustomJwtToken){
+            customJwtToken = (CustomJwtToken) authentication;
+        }else{
+            //예외처리
+        }
+        String loginId = customJwtToken.getLoginId();
         Optional<Member> member = memberRepository.findByLoginId(loginId);
 
         return member.get();
