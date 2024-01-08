@@ -39,30 +39,15 @@ public class SecurityConfig{
     private final ClientUserDetailService clientUserDetailService;
     private final CredentialConfig credentialConfig;
 
-    //providerManager의 목록에 customJwtProvider 등록
-
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.authenticationProvider(new CustomJwtProvider(clientUserDetailService, credentialConfig));
-        authenticationManagerBuilder.authenticationProvider(new CustomLoginProvider(clientUserDetailService, passwordEncoder()));
-        return authenticationManagerBuilder.build();
-    }
-
     //passwordEncoder 의 구현체로 BcryptpasswordEncoder를 bean 으로 등록
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
-
-
     //인증, 인가
-    //일부 경로는 token이 없어도 접근 가능하게 함
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain LoginFilterChain(HttpSecurity http) throws Exception{
 
         http    // CSRF 보안 비활성화
                 .csrf().disable()
@@ -76,34 +61,45 @@ public class SecurityConfig{
 
                 .and()
                 .authorizeRequests()
-                .antMatchers("/member/signup").permitAll()
+                .antMatchers("/member/signup" ,"/public/**").permitAll()
                 .and()
                 .antMatcher("/member/login")
                 .addFilterAt(new CustomLoginFilter(authenticationManager(null)), UsernamePasswordAuthenticationFilter.class);
 
+        return http.build();
+    }
+
+    @Bean
+    public SecurityFilterChain tokenAuthenticationFilterChain(HttpSecurity http) throws Exception{
+
+        http    // CSRF 보안 비활성화
+                .csrf().disable()
+                // 세션 비활성화
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .and()
+                .antMatcher("/shorten/**")
+                .addFilterAt(new CustomJwtFilter(authenticationManager(null),resolveToken), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
 
-//    @Bean
-//    public SecurityFilterChain filterChain2(HttpSecurity http) throws Exception{
-//
-//        http
-//                .csrf().disable()   //csrf 비활성화하고자 하는 경우
-//                // 세션 비활성화
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .antMatcher("/shorten/url")
-//                .authorizeRequests()
-//                .antMatchers("/shorten/url").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .addFilterBefore(new CustomJwtFilter(authenticationManager(null), resolveToken), UsernamePasswordAuthenticationFilter.class)
-//
-//        return http.build();
-//
-//    }
+
+
+
+    //providerManager의 목록에 customJwtProvider 등록
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(new CustomJwtProvider(clientUserDetailService, credentialConfig));
+        authenticationManagerBuilder.authenticationProvider(new CustomLoginProvider(clientUserDetailService, passwordEncoder()));
+        return authenticationManagerBuilder.build();
+    }
 
 }
