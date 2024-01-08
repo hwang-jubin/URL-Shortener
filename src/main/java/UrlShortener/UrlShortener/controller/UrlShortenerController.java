@@ -29,7 +29,13 @@ public class UrlShortenerController {
 
     private final UrlGenerator urlGenerator;
 
-    @PostMapping(value = "/url")
+    /**
+     * shortenUrl 생성 api
+     * @param shortenUrl
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping(value = "/shorten/url")
     public Result shortenUrlCreation(@RequestBody ShortenUrl shortenUrl , HttpServletRequest httpServletRequest){
         ShortenUrl newShortenUrl = shortenUrlService.createShortenUrl(shortenUrl , httpServletRequest);
         ShortenUrlDto responseShortenUrlDto = new ShortenUrlDto(urlGenerator, shortenUrl);
@@ -39,15 +45,25 @@ public class UrlShortenerController {
 
     }
 
-    @DeleteMapping(value = "{id}")
-    public Result deleteShortenUrl(@PathVariable Long id, HttpServletRequest request){
-        ShortenUrl shortenUrl = shortenUrlService.deleteShortenUrl(id, request);
-        ShortenUrlDto shortenUrlDto = new ShortenUrlDto(urlGenerator, shortenUrl);
-        Result<ShortenUrlDto> result = new Result<>(shortenUrlDto);
-        return result;
+    /**
+     * shortenUrl 삭제
+     * @param id
+     * @return
+     */
+    @DeleteMapping(value = "/shorten/{id}")
+    public String deleteShortenUrl(@PathVariable Long id){
+
+        ShortenUrl shortenUrl = shortenUrlService.deleteShortenUrl(id);
+
+        return "삭제되었습니다";
     }
 
-    @GetMapping(value="/shorten/{shortenUrl}")
+    /**
+     * shortenUrl 을 원본 url 로 redirect
+     * @param shortenUrl
+     * @param httpServletResponse
+     */
+    @GetMapping(value="/public/shorten/{shortenUrl}")
     public void redirectUrl(@PathVariable String shortenUrl, HttpServletResponse httpServletResponse){
         try {
             shortenUrlService.redirectUrl(shortenUrl, httpServletResponse);
@@ -56,7 +72,12 @@ public class UrlShortenerController {
         }
     }
 
-    @GetMapping(value ="/urls")
+    /**
+     * list 보여주는 api
+     * @param request
+     * @return
+     */
+    @GetMapping(value ="/shorten/urls")
     public Result UrlList(HttpServletRequest request){
 
         Member member = shortenUrlService.getUrlList(request);
