@@ -1,7 +1,10 @@
 package UrlShortener.UrlShortener.service;
 
 import UrlShortener.UrlShortener.config.CredentialConfig;
+import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.jwt.TokenGenerator;
+import UrlShortener.UrlShortener.repository.MemberRepository;
+import UrlShortener.UrlShortener.responseDto.LoginDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -19,17 +21,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationService {
 
     private final TokenGenerator tokenGenerator;
+    private final MemberRepository memberRepository;
 
-    public ResponseEntity login(){
+    public ResponseEntity<LoginDto> login(){
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //이름? id?
-        String jwt = tokenGenerator.generateToken(principal.toString());
+        String loginId = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        String jwt = tokenGenerator.generateToken(loginId);
 
+        Member member = memberRepository.findByLoginId(loginId).get();
         HttpHeaders httpHeaders = new HttpHeaders();
         // response header에 jwt token에 넣어줌
         httpHeaders.add(CredentialConfig.AUTHORIZATION_HEADER, "Bearer " + jwt);
 
-        return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+        LoginDto loginDto = new LoginDto(member);
+        return new ResponseEntity<>(loginDto,httpHeaders, HttpStatus.OK);
     }
 }
