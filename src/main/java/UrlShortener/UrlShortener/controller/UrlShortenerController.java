@@ -23,10 +23,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class UrlShortenerController {
-    private final ShortenUrlRepository shortenUrlRepository;
 
     private final ShortenUrlService shortenUrlService;
-
     private final UrlGenerator urlGenerator;
 
     /**
@@ -42,7 +40,6 @@ public class UrlShortenerController {
         Result result = new Result(responseShortenUrlDto);
 
         return result;
-
     }
 
     /**
@@ -51,11 +48,12 @@ public class UrlShortenerController {
      * @return
      */
     @DeleteMapping(value = "/shorten/{id}")
-    public String deleteShortenUrl(@PathVariable Long id){
+    public Result<ShortenUrl> deleteShortenUrl(@PathVariable Long id){
 
         ShortenUrl shortenUrl = shortenUrlService.deleteShortenUrl(id);
+        Result<ShortenUrl> result = new Result<>(shortenUrl);
 
-        return "삭제되었습니다";
+        return result;
     }
 
     /**
@@ -68,7 +66,7 @@ public class UrlShortenerController {
         try {
             shortenUrlService.redirectUrl(shortenUrl, httpServletResponse);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("redirect에 실패했습니다");
         }
     }
 
@@ -87,16 +85,4 @@ public class UrlShortenerController {
 
         return result;
     }
-
-
-    @Data
-    static class Result <T>{
-        private T data;
-
-        public Result(T data) {
-            this.data = data;
-        }
-    }
-
-
 }
