@@ -5,7 +5,7 @@ import UrlShortener.UrlShortener.jwt.filter.CustomJwtFilter;
 import UrlShortener.UrlShortener.jwt.filter.CustomLoginFilter;
 import UrlShortener.UrlShortener.jwt.provider.CustomJwtProvider;
 import UrlShortener.UrlShortener.jwt.provider.CustomLoginProvider;
-import UrlShortener.UrlShortener.util.ResolveToken;
+import UrlShortener.UrlShortener.jwt.ResolveToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

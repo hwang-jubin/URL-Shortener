@@ -1,6 +1,7 @@
-package UrlShortener.UrlShortener.util;
+package UrlShortener.UrlShortener.jwt;
 
 import UrlShortener.UrlShortener.config.CredentialConfig;
+import UrlShortener.UrlShortener.exception.customException.UnauthorizedException;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +14,8 @@ public class ResolveToken {
 
         if(bearerToken != null && bearerToken.startsWith("Bearer ")){
             return bearerToken.substring(7);
+        }else{
+            throw new UnauthorizedException("Authorization header 형식이 잘못 되었습니다");
         }
-        return null;
     }
 }
