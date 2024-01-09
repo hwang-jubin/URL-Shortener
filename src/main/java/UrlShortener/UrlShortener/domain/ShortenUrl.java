@@ -26,15 +26,14 @@ public class ShortenUrl {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="member_id")
     private Member member;
-
-    @CreatedDate
+    
     private LocalDateTime createShortenUrlDate;
 
     private LocalDateTime deleteShortenUrlDate;
 
     //임의 생성 방지
     protected ShortenUrl() {
-
+        this.createShortenUrlDate = LocalDateTime.now();
     }
 
     public void saveEncodedUrlAndMember(String encodedUrl, Member member){

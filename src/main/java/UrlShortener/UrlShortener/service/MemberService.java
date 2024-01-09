@@ -3,9 +3,11 @@ package UrlShortener.UrlShortener.service;
 import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
 import UrlShortener.UrlShortener.exception.customException.BadRequestException;
+import UrlShortener.UrlShortener.exception.customException.UnauthorizedException;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public Member CreateMember(Member member){
 
@@ -27,10 +29,8 @@ public class MemberService {
         Optional<Member> findMember = memberRepository.findByLoginId(loginId);
 
         if(findMember.isPresent()){
-
             throw new BadRequestException("중복된 id가 있습니다. 다른 id 를 입력해주세요.");
         }
-
         //encoding 된 password를 저장
         member.encodedPassword(passwordEncoder.encode(member.getPassword()));
 
