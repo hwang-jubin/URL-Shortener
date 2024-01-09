@@ -29,16 +29,4 @@ public class SingUpController {
 
         return result;
     }
-
-
-    @Data
-    static class Result <T>{
-        private T data;
-
-        public Result(T data) {
-            this.data = data;
-        }
-    }
-
-
 }

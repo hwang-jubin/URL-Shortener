@@ -35,15 +35,13 @@ public class Member {
 
     // 객체 생성 막음
     protected Member() {
+        this.createdMemberDate = LocalDateTime.now();
     }
     public Member encodedPassword(String encode) {
         this.password = encode;
         return this;
     }
 
-//    public boolean matchesPassword(Member member){
-//        member.getPassword();
-//
-//    }
+
 
 }
