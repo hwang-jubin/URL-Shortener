@@ -2,11 +2,11 @@ package UrlShortener.UrlShortener.security;
 
 
 import UrlShortener.UrlShortener.domain.Member;
-import UrlShortener.UrlShortener.exception.customException.CustomUnauthorizedException;
-import UrlShortener.UrlShortener.exception.customException.UnauthorizedException;
+import UrlShortener.UrlShortener.exception.customException.SecurityUnauthorizedException;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,7 +30,7 @@ public class ClientUserDetailService implements UserDetailsService {
         Optional<Member> findLonginId = memberRepository.findByLoginId(loginId);
         if(findLonginId.isEmpty()){
             log.info("해당 Id에 해당하는 사용자가 없습니다 :" + loginId);
-            throw new CustomUnauthorizedException(loginId + "에 해당하는 사용자가 없습니다");
+            throw new SecurityUnauthorizedException(loginId + "에 해당하는 사용자가 없습니다");
         }
         ClientUserDto clientUserDto = new ClientUserDto(findLonginId.get());
 

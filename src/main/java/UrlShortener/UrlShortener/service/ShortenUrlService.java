@@ -4,11 +4,10 @@ import UrlShortener.UrlShortener.config.CredentialConfig;
 import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
 import UrlShortener.UrlShortener.exception.customException.BadRequestException;
-import UrlShortener.UrlShortener.jwt.TokenGenerator;
+import UrlShortener.UrlShortener.exception.customException.UnauthorizedException;
 import UrlShortener.UrlShortener.jwt.token.CustomJwtToken;
 import UrlShortener.UrlShortener.repository.MemberRepository;
 import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
-import UrlShortener.UrlShortener.util.ResolveToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -108,6 +107,7 @@ public class ShortenUrlService {
             customJwtToken = (CustomJwtToken) authentication;
         }else{
             //예외처리
+            throw new ClassCastException("Authentication is not an instance of CustomJwtToken");
         }
         //token loginId와 삭제할 shortenUrl의 member LogId를 비교해서 같아야 삭제할 수 있음
         String tokenLoginId = customJwtToken.getLoginId();
@@ -116,7 +116,7 @@ public class ShortenUrlService {
             shortenUrl.checkingDeleteTime();
             return shortenUrl;
         }else{
-            throw new BadRequestException("삭제 권한이 없는 사용자 입니다");
+            throw new UnauthorizedException("삭제 권한이 없는 사용자 입니다");
         }
     }
 
@@ -145,6 +145,7 @@ public class ShortenUrlService {
             customJwtToken = (CustomJwtToken) authentication;
         }else{
             //예외처리
+            throw new ClassCastException("Authentication is not an instance of CustomJwtToken");
         }
         String loginId = customJwtToken.getLoginId();
         Optional<Member> member = memberRepository.findByLoginId(loginId);

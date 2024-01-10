@@ -2,11 +2,10 @@ package UrlShortener.UrlShortener.jwt.filter;
 
 import UrlShortener.UrlShortener.exception.customException.UnauthorizedException;
 import UrlShortener.UrlShortener.jwt.token.CustomJwtToken;
-import UrlShortener.UrlShortener.util.ResolveToken;
+import UrlShortener.UrlShortener.jwt.ResolveToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.OncePerRequestFilter;
 

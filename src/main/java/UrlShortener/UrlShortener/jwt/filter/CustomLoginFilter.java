@@ -25,7 +25,6 @@ public class CustomLoginFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ObjectMapper objectMapper = new ObjectMapper();
         CustomLoginToken customLoginToken = objectMapper.readValue(request.getInputStream(), CustomLoginToken.class);
         Authentication authentication = authenticationManager.authenticate(customLoginToken);
