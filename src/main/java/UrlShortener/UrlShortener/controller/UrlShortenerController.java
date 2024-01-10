@@ -3,21 +3,18 @@ package UrlShortener.UrlShortener.controller;
 
 import UrlShortener.UrlShortener.domain.Member;
 import UrlShortener.UrlShortener.domain.ShortenUrl;
-import UrlShortener.UrlShortener.repository.ShortenUrlRepository;
-import UrlShortener.UrlShortener.responseDto.ShortenUrlDto;
+import UrlShortener.UrlShortener.responseDto.ShortenUrlCreationDto;
+import UrlShortener.UrlShortener.responseDto.ShortenUrlDeleteDto;
 import UrlShortener.UrlShortener.responseDto.ShortenUrlListDto;
 import UrlShortener.UrlShortener.service.ShortenUrlService;
 import UrlShortener.UrlShortener.util.UrlGenerator;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -36,22 +33,24 @@ public class UrlShortenerController {
     @PostMapping(value = "/shorten/url")
     public Result shortenUrlCreation(@RequestBody ShortenUrl shortenUrl , HttpServletRequest httpServletRequest){
         ShortenUrl newShortenUrl = shortenUrlService.createShortenUrl(shortenUrl , httpServletRequest);
-        ShortenUrlDto responseShortenUrlDto = new ShortenUrlDto(urlGenerator, shortenUrl);
-        Result result = new Result(responseShortenUrlDto);
+        ShortenUrlCreationDto responseShortenUrlCreationDto = new ShortenUrlCreationDto(urlGenerator, shortenUrl);
+        Result result = new Result(responseShortenUrlCreationDto);
 
         return result;
     }
 
     /**
      * shortenUrl 삭제
+     *
      * @param id
      * @return
      */
     @DeleteMapping(value = "/shorten/{id}")
-    public Result<ShortenUrl> deleteShortenUrl(@PathVariable Long id){
+    public Result<ShortenUrlDeleteDto> deleteShortenUrl(@PathVariable Long id){
 
         ShortenUrl shortenUrl = shortenUrlService.deleteShortenUrl(id);
-        Result<ShortenUrl> result = new Result<>(shortenUrl);
+        ShortenUrlDeleteDto shortenUrlDeleteDto = new ShortenUrlDeleteDto(urlGenerator,shortenUrl);
+        Result<ShortenUrlDeleteDto> result = new Result<>(shortenUrlDeleteDto);
 
         return result;
     }
