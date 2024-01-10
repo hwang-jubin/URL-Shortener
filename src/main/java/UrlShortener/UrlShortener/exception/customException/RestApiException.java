@@ -9,7 +9,6 @@ public class RestApiException extends RuntimeException{
 
     ErrorCode errorCode;
 
-
     public RestApiException(String customMessage , ErrorCode errorCode) {
         super(customMessage);
         this.errorCode = errorCode;
